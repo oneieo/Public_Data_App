@@ -16,7 +16,7 @@ plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
 # BASE = r'C:\Users\오형종\OneDrive - 전북대학교\바탕 화면\project'/
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(BASE, exist_ok=True)
 
 # ============================================================
@@ -38,9 +38,9 @@ def draw_convex_hull(ax, points, color, alpha_fill=0.15, alpha_line=0.6):
 # ============================================================
 # 1. 파일 불러오기
 # ============================================================
-ground = pd.read_csv(f'{BASE}\\final_playground.csv', encoding='utf-8-sig')
-pet    = pd.read_csv(f'{BASE}\\final_pet_park_.csv',  encoding='utf-8-sig')
-zscore = pd.read_csv(f'{BASE}\\zscore.csv',           encoding='utf-8-sig')
+ground = pd.read_csv(f'{BASE}\\data\\final_playground.csv', encoding='utf-8-sig')
+pet    = pd.read_csv(f'{BASE}\\data\\final_pet_park_.csv',  encoding='utf-8-sig')
+zscore = pd.read_csv(f'{BASE}\\data\\zscore.csv',           encoding='utf-8-sig')
 
 # ============================================================
 # [1단계] Z점수 역할: 23개 동 선별 (필터링)
