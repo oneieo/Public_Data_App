@@ -15,7 +15,8 @@ warnings.filterwarnings('ignore')
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
-BASE = r'C:\Users\오형종\OneDrive - 전북대학교\바탕 화면\project'
+# BASE = r'C:\Users\오형종\OneDrive - 전북대학교\바탕 화면\project'/
+BASE = os.path.dirname(os.path.abspath(__file__))
 os.makedirs(BASE, exist_ok=True)
 
 # ============================================================
