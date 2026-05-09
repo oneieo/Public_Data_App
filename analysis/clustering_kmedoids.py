@@ -232,10 +232,10 @@ print(final_selected[['선택순위','행정동','시설명','면적','노후도
                        '공공시설여부','Z점수','소재지주소']].to_string())
 
 # 저장
-ground.to_csv(f'{BASE}\\07_클러스터링_전체결과.csv',  index=False, encoding='utf-8-sig')
-best_df.to_csv(f'{BASE}\\07_전환최적_클러스터.csv',   index=False, encoding='utf-8-sig')
-dong_rep.to_csv(f'{BASE}\\07_동별대표_후보.csv',      index=False, encoding='utf-8-sig')
-final_selected.to_csv(f'{BASE}\\07_최종선정.csv',     index=False, encoding='utf-8-sig')
+ground.to_csv(os.path.join(OUTPUT_DIR, '07_클러스터링_전체결과.csv'), index=False, encoding='utf-8-sig')
+best_df.to_csv(os.path.join(OUTPUT_DIR, '07_전환최적_클러스터.csv'), index=False, encoding='utf-8-sig')
+dong_rep.to_csv(os.path.join(OUTPUT_DIR, '07_동별대표_후보.csv'), index=False, encoding='utf-8-sig')
+final_selected.to_csv(os.path.join(OUTPUT_DIR, '07_최종선정.csv'), index=False, encoding='utf-8-sig')
 
 print('\n저장 완료:')
 print('kmedoids_01_elbow.png    : Elbow + Silhouette')
