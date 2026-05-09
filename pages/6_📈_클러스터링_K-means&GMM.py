@@ -60,10 +60,32 @@ features = ['공공시설여부', '면적', '노후도', '펫존거리']
 COLORS   = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b']
 
 # ══════════════════════════════════════════
+# PCA 사전 계산 (전체 페이지에서 공유)
+# ══════════════════════════════════════════
+@st.cache_data
+def compute_pca(ground_df):
+    feats = ['공공시설여부', '면적', '노후도', '펫존거리']
+    X = ground_df[feats].copy().fillna(ground_df[feats].mean(numeric_only=True))
+    scaler    = MinMaxScaler()
+    X_scaled  = scaler.fit_transform(X)
+    pca       = PCA(n_components=2)
+    X_pca     = pca.fit_transform(X_scaled)
+    explained = pca.explained_variance_ratio_
+    loadings  = pd.DataFrame(
+        pca.components_.T,
+        columns=['PC1', 'PC2'],
+        index=feats
+    ).round(3)
+    return X_pca, explained, loadings
+
+X_pca_shared, explained_shared, loadings_shared = compute_pca(ground)
+
+# ══════════════════════════════════════════
 # 클러스터 변수 생성
 # ══════════════════════════════════════════
 st.subheader("🔧 클러스터 변수 생성")
 
+# ── 1) 사용 변수 카드 ──────────────────────
 st.markdown("##### 📌 사용 변수")
 c1, c2, c3, c4 = st.columns(4)
 c1.info("**공공시설여부**\n\n공공=1 / 민간=0\n이진 변수")
@@ -73,6 +95,233 @@ c4.info("**펫존거리** (km)\n\n가장 가까운\n반려동물 공원까지")
 
 st.markdown("---")
 
+# ══════════════════════════════════════════
+# PCA 차원 축소 설명 섹션
+# ══════════════════════════════════════════
+st.markdown("##### 🔬 PCA 차원 축소 (4차원 → 2차원)")
+st.caption(
+    "4개 변수를 MinMaxScaler로 정규화한 뒤 PCA로 2개 주성분(PC1·PC2)으로 압축합니다. "
+    "클러스터링은 이 2차원 공간에서 수행됩니다."
+)
+
+# ── (A) 설명력 지표 카드 ──────────────────
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("PC1 설명력", f"{explained_shared[0]*100:.1f}%",
+          help="PC1이 원본 데이터 분산을 설명하는 비율")
+m2.metric("PC2 설명력", f"{explained_shared[1]*100:.1f}%",
+          help="PC2가 원본 데이터 분산을 설명하는 비율")
+m3.metric("누적 설명력", f"{explained_shared.sum()*100:.1f}%",
+          help="PC1 + PC2 합산 설명력")
+m4.metric("압축 차원", "4D → 2D",
+          help="클러스터링에 사용되는 최종 차원 수")
+
+st.markdown("")
+
+# ── (B) 분산 설명력 막대 + 로딩 히트맵 ───
+col_var, col_heat = st.columns([1, 1.2])
+
+with col_var:
+    st.markdown("**① 주성분별 분산 설명력**")
+    var_df = pd.DataFrame({
+        '주성분': ['PC1', 'PC2'],
+        '개별 설명력 (%)': [round(explained_shared[0]*100, 1),
+                            round(explained_shared[1]*100, 1)],
+        '누적 설명력 (%)': [round(explained_shared[0]*100, 1),
+                            round(explained_shared.sum()*100, 1)],
+    })
+
+    fig_var = go.Figure()
+    fig_var.add_trace(go.Bar(
+        x=var_df['주성분'],
+        y=var_df['개별 설명력 (%)'],
+        name='개별 설명력',
+        marker=dict(color=['#6366f1', '#a5b4fc'], cornerradius=6),
+        text=[f"{v}%" for v in var_df['개별 설명력 (%)']],
+        textposition='outside',
+        width=0.4,
+    ))
+    fig_var.add_trace(go.Scatter(
+        x=var_df['주성분'],
+        y=var_df['누적 설명력 (%)'],
+        name='누적 설명력',
+        mode='lines+markers+text',
+        text=[f"{v}%" for v in var_df['누적 설명력 (%)']],
+        textposition='top center',
+        line=dict(color='#f59e0b', width=2, dash='dot'),
+        marker=dict(size=10, color='#f59e0b', symbol='diamond'),
+    ))
+    fig_var.update_layout(
+        template='plotly_white',
+        yaxis=dict(title='설명력 (%)', range=[0, 115], gridcolor='#f1f5f9'),
+        xaxis=dict(title='주성분'),
+        legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center'),
+        margin=dict(t=30, b=10),
+        height=310,
+        bargap=0.4,
+    )
+    st.plotly_chart(fig_var, use_container_width=True, key="pca_variance")
+
+with col_heat:
+    st.markdown("**② 주성분 로딩 (변수 기여도)**")
+    load_vals = loadings_shared.values
+    load_vars = loadings_shared.index.tolist()
+    load_pcs  = ['PC1', 'PC2']
+
+    fig_heat = go.Figure(go.Heatmap(
+        z=load_vals,
+        x=load_pcs,
+        y=load_vars,
+        colorscale=[
+            [0.0,  '#b91c1c'],
+            [0.25, '#ef4444'],
+            [0.5,  '#f8fafc'],
+            [0.75, '#6366f1'],
+            [1.0,  '#312e81'],
+        ],
+        zmid=0, zmin=-1, zmax=1,
+        text=[[f"{v:+.3f}" for v in row] for row in load_vals],
+        texttemplate='%{text}',
+        textfont=dict(size=14, family='monospace'),
+        showscale=True,
+        colorbar=dict(
+            title='로딩값',
+            tickvals=[-1, -0.5, 0, 0.5, 1],
+            len=0.85,
+            thickness=14,
+            tickfont=dict(size=11),
+        ),
+        hoverongaps=False,
+        hovertemplate='변수: %{y}<br>주성분: %{x}<br>로딩: %{z:.3f}<extra></extra>',
+    ))
+    fig_heat.update_layout(
+        template='plotly_white',
+        xaxis=dict(title='주성분', side='top', tickfont=dict(size=13, color='#1e293b')),
+        yaxis=dict(title='', autorange='reversed', tickfont=dict(size=12)),
+        margin=dict(t=40, b=10, l=10, r=10),
+        height=310,
+    )
+    st.plotly_chart(fig_heat, use_container_width=True, key="pca_loading_heat")
+
+st.caption(
+    "🔵 양수(파란색): 해당 PC 방향으로 기여  |  "
+    "🔴 음수(빨간색): 반대 방향으로 기여  |  "
+    "절댓값이 클수록 기여도 높음"
+)
+
+st.markdown("")
+
+# ── (C) Biplot ────────────────────────────
+st.markdown("**③ Biplot — 데이터 분포 & 변수 방향**")
+
+ARROW_COLORS = ['#6366f1', '#f59e0b', '#ef4444', '#10b981']
+scale        = 2.2
+
+np.random.seed(42)
+n_sample   = min(400, len(X_pca_shared))
+sample_idx = np.random.choice(len(X_pca_shared), size=n_sample, replace=False)
+sample_x   = X_pca_shared[sample_idx, 0]
+sample_y   = X_pca_shared[sample_idx, 1]
+
+fig_bi = go.Figure()
+
+# 데이터 포인트
+fig_bi.add_trace(go.Scatter(
+    x=sample_x, y=sample_y,
+    mode='markers',
+    marker=dict(color='#cbd5e1', size=5, opacity=0.55,
+                line=dict(color='#94a3b8', width=0.3)),
+    name='놀이터',
+    hovertemplate='PC1: %{x:.3f}<br>PC2: %{y:.3f}<extra>놀이터</extra>',
+))
+
+# 로딩 화살표 + 레이블
+for i, var in enumerate(features):
+    lx  = float(loadings_shared.loc[var, 'PC1']) * scale
+    ly  = float(loadings_shared.loc[var, 'PC2']) * scale
+    clr = ARROW_COLORS[i]
+
+    # 화살표 몸통
+    fig_bi.add_trace(go.Scatter(
+        x=[0, lx], y=[0, ly],
+        mode='lines',
+        line=dict(color=clr, width=2.5),
+        showlegend=False, hoverinfo='skip',
+    ))
+    # 화살표 끝 마커
+    fig_bi.add_trace(go.Scatter(
+        x=[lx], y=[ly],
+        mode='markers',
+        marker=dict(symbol='arrow', size=14, color=clr,
+                    angleref='previous', standoff=0),
+        showlegend=False, hoverinfo='skip',
+    ))
+    # 변수명 레이블
+    fig_bi.add_annotation(
+        x=lx * 1.15, y=ly * 1.15,
+        text=f"<b>{var}</b>",
+        showarrow=False,
+        font=dict(color=clr, size=12, family='Malgun Gothic'),
+        bgcolor='rgba(255,255,255,0.8)',
+        borderpad=2,
+    )
+
+# 원점 십자선
+ax_range = max(abs(X_pca_shared).max() * 1.05, abs(scale) * 1.15)
+fig_bi.add_shape(type='line', x0=0, x1=0, y0=-ax_range, y1=ax_range,
+                 line=dict(color='#e2e8f0', width=1, dash='dot'))
+fig_bi.add_shape(type='line', x0=-ax_range, x1=ax_range, y0=0, y1=0,
+                 line=dict(color='#e2e8f0', width=1, dash='dot'))
+
+fig_bi.update_layout(
+    template='plotly_white',
+    xaxis=dict(
+        title=f'PC1 ({explained_shared[0]*100:.1f}%)',
+        gridcolor='#f1f5f9', zeroline=False,
+        range=[-ax_range, ax_range],
+    ),
+    yaxis=dict(
+        title=f'PC2 ({explained_shared[1]*100:.1f}%)',
+        gridcolor='#f1f5f9', zeroline=False,
+        range=[-ax_range, ax_range],
+        scaleanchor='x', scaleratio=1,
+    ),
+    legend=dict(orientation='h', y=-0.12, x=0.5, xanchor='center'),
+    margin=dict(t=20, b=20, l=20, r=20),
+    height=460,
+    hovermode='closest',
+)
+st.plotly_chart(fig_bi, use_container_width=True, key="pca_biplot")
+
+# ── (D) PC1/PC2 해석 expander ─────────────
+with st.expander("📖 PC1 / PC2 해석 보기"):
+    pc1_main = loadings_shared['PC1'].abs().idxmax()
+    pc2_main = loadings_shared['PC2'].abs().idxmax()
+    pc1_sign = "＋" if loadings_shared.loc[pc1_main, 'PC1'] > 0 else "－"
+    pc2_sign = "＋" if loadings_shared.loc[pc2_main, 'PC2'] > 0 else "－"
+
+    st.markdown(f"""
+| 주성분 | 설명력 | 주요 기여 변수 | 로딩 부호 | 해석 |
+|:------:|:------:|:-------------:|:---------:|:-----|
+| **PC1** | {explained_shared[0]*100:.1f}% | **{pc1_main}** | {pc1_sign} | PC1 값이 높을수록 **{pc1_main}** 특성이 강함 |
+| **PC2** | {explained_shared[1]*100:.1f}% | **{pc2_main}** | {pc2_sign} | PC2 값이 높을수록 **{pc2_main}** 특성이 강함 |
+
+> **로딩(Loading)**: 원본 변수가 주성분에 얼마나, 어느 방향으로 기여하는지를 나타내는 계수입니다.  
+> Biplot 화살표가 **같은 방향**이면 두 변수는 양의 상관, **반대 방향**이면 음의 상관입니다.
+    """)
+
+    st.dataframe(
+        loadings_shared.style
+            .background_gradient(cmap='RdBu', axis=None, vmin=-1, vmax=1)
+            .format("{:+.3f}"),
+        use_container_width=True,
+        height=185,
+    )
+
+st.markdown("---")
+
+# ══════════════════════════════════════════
+# 변수별 분포
+# ══════════════════════════════════════════
 st.markdown("##### 📊 변수별 분포")
 col1, col2 = st.columns(2)
 
