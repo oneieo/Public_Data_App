@@ -66,4 +66,4 @@ plt.ylabel('누적 입지 점수')
 plt.legend()
 
 plt.grid()
-plt.show()
+plt.close()
