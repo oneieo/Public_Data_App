@@ -311,6 +311,6 @@ plt.suptitle(
 
 plt.tight_layout()
 plt.savefig('output/06_민감도_순위변동_그래프_top3.png', dpi=150)
-plt.show()
+plt.close()
 
 print('\n그래프 저장: output/06_민감도_순위변동_그래프_top3.png')
