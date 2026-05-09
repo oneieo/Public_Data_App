@@ -18,6 +18,9 @@ plt.rcParams['axes.unicode_minus'] = False
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(BASE, exist_ok=True)
 
+OUTPUT_DIR = os.path.join(BASE, 'output')
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 def draw_convex_hull(ax, points, color, alpha_fill=0.15, alpha_line=0.6):
     if len(points) < 3:
         return
@@ -102,8 +105,8 @@ for ax, pc_idx, pc_name in zip(axes, [0, 1], ['PC1', 'PC2']):
 
 plt.suptitle('GMM: 최적 K 결정 (밀도 그래프 봉우리 개수)', fontsize=13, fontweight='bold')
 plt.tight_layout()
-plt.savefig(f'{BASE}\\gmm_01_density.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'gmm_01_density.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 # PC1 봉우리 개수를 GMM K로 사용
 pc1_data  = X_pca[:, 0]
@@ -152,8 +155,8 @@ ax.text(0.02, 0.02,
         bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
 
 plt.tight_layout()
-plt.savefig(f'{BASE}\\gmm_02_result.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'gmm_02_result.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 print(f'GMM: 군집 크기={sizes}, 불균형={ratio:.1f}배 → ❌ 기각')
 print('\n저장 완료:')

@@ -17,6 +17,9 @@ plt.rcParams['axes.unicode_minus'] = False
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(BASE, exist_ok=True)
 
+OUTPUT_DIR = os.path.join(BASE, 'output')
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 def draw_convex_hull(ax, points, color, alpha_fill=0.15, alpha_line=0.6):
     if len(points) < 3:
         return
