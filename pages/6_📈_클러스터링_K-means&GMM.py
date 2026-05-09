@@ -309,13 +309,32 @@ with st.expander("📖 PC1 / PC2 해석 보기"):
 > Biplot 화살표가 **같은 방향**이면 두 변수는 양의 상관, **반대 방향**이면 음의 상관입니다.
     """)
 
-    st.dataframe(
-        loadings_shared.style
-            .background_gradient(cmap='RdBu', axis=None, vmin=-1, vmax=1)
-            .format("{:+.3f}"),
-        use_container_width=True,
-        height=185,
+    fig_load_exp = go.Figure(go.Heatmap(
+        z=loadings_shared.values,
+        x=['PC1', 'PC2'],
+        y=loadings_shared.index.tolist(),
+        colorscale=[
+            [0.0, '#b91c1c'], [0.25, '#ef4444'],
+            [0.5, '#f8fafc'],
+            [0.75, '#6366f1'], [1.0, '#312e81'],
+        ],
+        zmid=0, zmin=-1, zmax=1,
+        text=[[f"{v:+.3f}" for v in row] for row in loadings_shared.values],
+        texttemplate='%{text}',
+        textfont=dict(size=13, family='monospace'),
+        showscale=True,
+        colorbar=dict(title='로딩값', tickvals=[-1,-0.5,0,0.5,1],
+                      len=0.85, thickness=12),
+        hovertemplate='변수: %{y}<br>주성분: %{x}<br>로딩: %{z:.3f}<extra></extra>',
+    ))
+    fig_load_exp.update_layout(
+        template='plotly_white',
+        xaxis=dict(side='top', tickfont=dict(size=13)),
+        yaxis=dict(autorange='reversed', tickfont=dict(size=12)),
+        margin=dict(t=30, b=10, l=10, r=10),
+        height=220,
     )
+    st.plotly_chart(fig_load_exp, use_container_width=True, key="pca_load_exp")
 
 st.markdown("---")
 
