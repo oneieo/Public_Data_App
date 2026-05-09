@@ -161,7 +161,7 @@ for label, b, s, t, p in zip(['절편'] + X_vars, beta, se, t_stats, p_vals):
 
 # 모델 요약 행 추가
 summary_row = {
-    '변수': '[ 모델 요약 ]',
+    '변수': '[모델 요약]',
     '비표준화_회귀계수': '',
     '표준오차': '',
     't통계량': '',
@@ -170,7 +170,7 @@ summary_row = {
     '유의여부': f'수정R²={adj_r2:.4f} | F={F:.4f}'
 }
 
-csv3 = pd.DataFrame(reg_rows)
+csv3 = pd.DataFrame(reg_rows + [summary_row])
 csv3.to_csv('output/03_다중회귀분석_결과.csv', index=False, encoding='utf-8-sig')
 print('저장 완료: output/03_다중회귀분석_결과.csv')
 print(csv3.to_string())
