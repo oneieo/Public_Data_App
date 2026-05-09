@@ -7,7 +7,7 @@ plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus'] = False
 
 # 데이터 불러오기
-df = pd.read_csv("output/05_최종_Z점수_순위.csv", encoding="utf-8-sig")
+df = pd.read_csv("zscore.csv", encoding="utf-8-sig")
 
 # 컬럼명 확인
 print(df.columns)
