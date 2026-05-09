@@ -17,6 +17,9 @@ plt.rcParams['axes.unicode_minus'] = False
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(BASE, exist_ok=True)
 
+OUTPUT_DIR = os.path.join(BASE, 'output')
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 def draw_convex_hull(ax, points, color, alpha_fill=0.15, alpha_line=0.6):
     if len(points) < 3:
         return
@@ -100,8 +103,8 @@ for k, v in zip(K_range, silhouettes):
 
 plt.suptitle('K-means: 최적 K 결정 (Elbow + Silhouette)', fontsize=13, fontweight='bold')
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmeans_01_elbow.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmeans_01_elbow.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 optimal_k = list(K_range)[silhouettes.index(max(silhouettes))]
 print(f'K-means 최적 K = {optimal_k}')
@@ -143,8 +146,8 @@ ax.text(0.02, 0.02,
         bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
 
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmeans_02_result.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmeans_02_result.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 print(f'K-means: 군집 크기={sizes}, 불균형={ratio:.1f}배 → ❌ 기각')
 print('\n저장 완료:')

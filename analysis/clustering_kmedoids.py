@@ -18,6 +18,9 @@ plt.rcParams['axes.unicode_minus'] = False
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.makedirs(BASE, exist_ok=True)
 
+OUTPUT_DIR = os.path.join(BASE, 'output')
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 def draw_convex_hull(ax, points, color, alpha_fill=0.15, alpha_line=0.6):
     if len(points) < 3:
         return
@@ -122,8 +125,8 @@ for k, v in zip(K_range, silhouettes):
 
 plt.suptitle('K-medoids: 최적 K 결정 (Elbow + Silhouette)', fontsize=13, fontweight='bold')
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmedoids_01_elbow.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmedoids_01_elbow.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 optimal_k = list(K_range)[silhouettes.index(max(silhouettes))]
 print(f'K-medoids 최적 K = {optimal_k}')
@@ -166,8 +169,8 @@ ax.text(0.02, 0.02,
         bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
 
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmedoids_02_result.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmedoids_02_result.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 # ============================================================
 # 전환 최적 클러스터 선정 및 최종 결과
@@ -219,8 +222,8 @@ ax.set_title('동별 Z점수 누적합 기울기 (최적 최종 개수 결정)',
              fontsize=13, fontweight='bold')
 ax.legend(fontsize=10); ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmedoids_03_optimal_n.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmedoids_03_optimal_n.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 # 최종 선정
 final_selected = dong_rep.head(optimal_n).copy()
@@ -229,10 +232,10 @@ print(final_selected[['선택순위','행정동','시설명','면적','노후도
                        '공공시설여부','Z점수','소재지주소']].to_string())
 
 # 저장
-ground.to_csv(f'{BASE}\\07_클러스터링_전체결과.csv',  index=False, encoding='utf-8-sig')
-best_df.to_csv(f'{BASE}\\07_전환최적_클러스터.csv',   index=False, encoding='utf-8-sig')
-dong_rep.to_csv(f'{BASE}\\07_동별대표_후보.csv',      index=False, encoding='utf-8-sig')
-final_selected.to_csv(f'{BASE}\\07_최종선정.csv',     index=False, encoding='utf-8-sig')
+ground.to_csv(os.path.join(OUTPUT_DIR, '07_클러스터링_전체결과.csv'), index=False, encoding='utf-8-sig')
+best_df.to_csv(os.path.join(OUTPUT_DIR, '07_전환최적_클러스터.csv'), index=False, encoding='utf-8-sig')
+dong_rep.to_csv(os.path.join(OUTPUT_DIR, '07_동별대표_후보.csv'), index=False, encoding='utf-8-sig')
+final_selected.to_csv(os.path.join(OUTPUT_DIR, '07_최종선정.csv'), index=False, encoding='utf-8-sig')
 
 print('\n저장 완료:')
 print('kmedoids_01_elbow.png    : Elbow + Silhouette')
