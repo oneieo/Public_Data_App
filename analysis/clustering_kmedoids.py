@@ -125,8 +125,8 @@ for k, v in zip(K_range, silhouettes):
 
 plt.suptitle('K-medoids: 최적 K 결정 (Elbow + Silhouette)', fontsize=13, fontweight='bold')
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmedoids_01_elbow.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmedoids_01_elbow.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 optimal_k = list(K_range)[silhouettes.index(max(silhouettes))]
 print(f'K-medoids 최적 K = {optimal_k}')
@@ -169,8 +169,8 @@ ax.text(0.02, 0.02,
         bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
 
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmedoids_02_result.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmedoids_02_result.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 # ============================================================
 # 전환 최적 클러스터 선정 및 최종 결과
@@ -222,8 +222,8 @@ ax.set_title('동별 Z점수 누적합 기울기 (최적 최종 개수 결정)',
              fontsize=13, fontweight='bold')
 ax.legend(fontsize=10); ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig(f'{BASE}\\kmedoids_03_optimal_n.png', dpi=150, bbox_inches='tight')
-plt.show()
+plt.savefig(os.path.join(OUTPUT_DIR, 'kmedoids_03_optimal_n.png'), dpi=150, bbox_inches='tight')
+plt.close()
 
 # 최종 선정
 final_selected = dong_rep.head(optimal_n).copy()
