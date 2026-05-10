@@ -407,7 +407,7 @@ with col2:
         x='Z점수', y='행정동', orientation='h',
         text=top_df.sort_values('Z점수')['Z점수'].apply(lambda v: f"{v:.3f}"),
         color='Z점수',
-        color_continuous_scale=['#c7d2fe', '#6366f1', '#312e81'],
+        color_continuous_scale=["#dee1ff", "#2065af", "#004288"],
         template='plotly_white',
         title=f'상위 {top_n}개 행정동 최종 Z점수'
     )
