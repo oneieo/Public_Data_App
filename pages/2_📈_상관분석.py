@@ -64,7 +64,129 @@ with st.expander("🔧 파생변수 생성 방법 보기"):
 
 st.markdown("---")
 
-# ── 변수별 기초통계 (데이터 있을 때만) ───
+# # ── 변수별 기초통계 (데이터 있을 때만) ───
+# def read_csv_safe(path):
+#     for enc in ['utf-8-sig', 'cp949', 'euc-kr', 'utf-8']:
+#         try:
+#             return pd.read_csv(path, encoding=enc)
+#         except Exception:
+#             continue
+#     return None
+
+# @st.cache_data
+# def load_raw():
+#     files = {
+#         'population': 'final_population.csv',
+#         'move_pop':   'move_population.csv',
+#         'hospital':   'final_animal_hospital.csv',
+#         'pharmacy':   'final_animal_permercy.csv',
+#         'pet_shop':   'pet_shop.csv',
+#         'bus':        'bus_count.csv',
+#         'subway':     'subway_station_count.csv',
+#         'money':      'money.csv',
+#         'playground': 'final_playground_count.csv',
+#         'pet_reg':    'final_pet_registration.csv',
+#         'pet_park':   'final_pet_park_count.csv',
+#     }
+#     dfs = {}
+#     for key, fname in files.items():
+#         df = read_csv_safe(os.path.join(DATA_DIR, fname))
+#         if df is not None:
+#             dfs[key] = df
+#     return dfs
+
+# dfs = load_raw()
+
+# if len(dfs) == len(['population','move_pop','hospital','pharmacy',
+#                      'pet_shop','bus','subway','money',
+#                      'playground','pet_reg','pet_park']):
+#     try:
+#         hospital_cnt = dfs['hospital'].groupby('행정동').size().reset_index(name='동물병원수')
+#         pharmacy_cnt = dfs['pharmacy'].groupby('행정동').size().reset_index(name='동물약국수')
+
+#         move_col  = [c for c in dfs['move_pop'].columns  if c != '행정동'][0]
+#         shop_col  = [c for c in dfs['pet_shop'].columns  if c != '행정동'][0]
+#         bus_col   = [c for c in dfs['bus'].columns       if c != '행정동'][0]
+#         sub_col   = [c for c in dfs['subway'].columns    if c != '행정동'][0]
+#         play_col  = [c for c in dfs['playground'].columns if c != '행정동'][0]
+#         park_col  = [c for c in dfs['pet_park'].columns  if c != '행정동'][0]
+
+#         df_all = dfs['population'][['행정동', '인구수']].copy()
+#         df_all = df_all.merge(dfs['move_pop'][['행정동', move_col]].rename(columns={move_col: '유동인구'}), on='행정동', how='left')
+#         df_all = df_all.merge(hospital_cnt, on='행정동', how='left')
+#         df_all = df_all.merge(pharmacy_cnt, on='행정동', how='left')
+#         df_all = df_all.merge(dfs['pet_shop'][['행정동', shop_col]].rename(columns={shop_col: '펫샵수'}), on='행정동', how='left')
+#         df_all = df_all.merge(dfs['bus'][['행정동', bus_col]].rename(columns={bus_col: '버스정류장수'}), on='행정동', how='left')
+#         df_all = df_all.merge(dfs['subway'][['행정동', sub_col]].rename(columns={sub_col: '역개수'}), on='행정동', how='left')
+#         df_all = df_all.merge(dfs['money'][['행정동', '공시지가_평균']].rename(columns={'공시지가_평균': '공시지가'}), on='행정동', how='left')
+#         df_all = df_all.merge(dfs['playground'][['행정동', play_col]].rename(columns={play_col: '놀이터개수'}), on='행정동', how='left')
+#         df_all = df_all.merge(dfs['pet_reg'][['행정동', '합계']].rename(columns={'합계': '반려동물등록수'}), on='행정동', how='left')
+#         df_all = df_all.merge(dfs['pet_park'][['행정동', park_col]].rename(columns={park_col: '펫파크수'}), on='행정동', how='left')
+#         df_all = df_all.fillna(0)
+
+#         for col in df_all.columns:
+#             if col != '행정동':
+#                 df_all[col] = df_all[col].astype(str).str.replace(',', '').astype(float)
+
+#         df_all['상권활성도'] = df_all['동물병원수'] + df_all['동물약국수'] + df_all['펫샵수']
+#         df_all['교통편의도'] = df_all['버스정류장수'] + df_all['역개수']
+#         df_all['Y']         = df_all['반려동물등록수'] / (df_all['펫파크수'] + 1)
+
+#         X_vars    = ['인구수', '유동인구', '상권활성도', '교통편의도', '공시지가', '놀이터개수']
+#         stat_cols = X_vars + ['Y']
+#         stat_df   = df_all[stat_cols].describe().T.round(2)
+#         stat_df.index.name = '변수'
+
+#         st.markdown("**📋 변수별 기초통계**")
+
+#         # 변수별 분포 박스플롯
+#         box_data = df_all[X_vars].copy()
+#         # 정규화 (스케일 차이 크므로 시각화용)
+#         box_norm = (box_data - box_data.min()) / (box_data.max() - box_data.min() + 1e-9)
+#         box_norm['행정동'] = df_all['행정동']
+#         box_melt = box_norm.melt(id_vars='행정동', var_name='변수', value_name='정규화값')
+
+#         var_colors = {name: color for name, color, _, _ in x_meta}
+
+#         fig_box = go.Figure()
+#         for name, color, _, _ in x_meta:
+#             sub = box_melt[box_melt['변수'] == name]
+#             fig_box.add_trace(go.Box(
+#                 y=sub['정규화값'],
+#                 name=name,
+#                 marker_color=color,
+#                 boxmean='sd',
+#                 hovertemplate=f'<b>{name}</b><br>정규화값: %{{y:.3f}}<extra></extra>',
+#             ))
+
+#         fig_box.update_layout(
+#             template='plotly_white',
+#             title=dict(text='독립변수 분포 비교 (MinMax 정규화)', x=0.5, xanchor='center'),
+#             yaxis=dict(title='정규화값 (0~1)', gridcolor='#f1f5f9'),
+#             xaxis=dict(title='변수'),
+#             showlegend=False,
+#             margin=dict(t=50, b=20), height=340,
+#         )
+#         st.plotly_chart(fig_box, use_container_width=True, key="var_boxplot")
+
+#         st.dataframe(
+#             stat_df.rename(columns={
+#                 'count': '개수', 'mean': '평균', 'std': '표준편차',
+#                 'min': '최솟값', '25%': '1사분위', '50%': '중앙값',
+#                 '75%': '3사분위', 'max': '최댓값'
+#             }),
+#             use_container_width=True,
+#         )
+
+#         st.markdown("---")
+
+#     except Exception as e:
+#         st.warning(f"기초통계 계산 중 오류 (히트맵은 정상 표시됩니다): {e}")
+#         st.markdown("---")
+# else:
+#     st.markdown("---")
+
+# ── 변수별 기초통계 ──────────────────────
 def read_csv_safe(path):
     for enc in ['utf-8-sig', 'cp949', 'euc-kr', 'utf-8']:
         try:
@@ -74,7 +196,7 @@ def read_csv_safe(path):
     return None
 
 @st.cache_data
-def load_raw():
+def load_raw(data_dir):  # ← DATA_DIR을 인자로 받음
     files = {
         'population': 'final_population.csv',
         'move_pop':   'move_population.csv',
@@ -90,38 +212,49 @@ def load_raw():
     }
     dfs = {}
     for key, fname in files.items():
-        df = read_csv_safe(os.path.join(DATA_DIR, fname))
+        path = os.path.join(data_dir, fname)
+        df   = read_csv_safe(path)
         if df is not None:
             dfs[key] = df
     return dfs
 
-dfs = load_raw()
+dfs = load_raw(DATA_DIR)  # ← 인자로 넘기기
 
-if len(dfs) == len(['population','move_pop','hospital','pharmacy',
-                     'pet_shop','bus','subway','money',
-                     'playground','pet_reg','pet_park']):
+# ── 로드 실패 파일 확인 ──
+required     = ['population','move_pop','hospital','pharmacy',
+                'pet_shop','bus','subway','money',
+                'playground','pet_reg','pet_park']
+missing_keys = [k for k in required if k not in dfs]
+
+if missing_keys:
+    st.warning(f"⚠️ 로드 실패한 파일: {missing_keys}")
+    st.write("DATA_DIR:", DATA_DIR)
+    st.write("존재하는 파일:", os.listdir(DATA_DIR) if os.path.exists(DATA_DIR) else "경로 없음")
+    st.markdown("---")
+
+elif len(missing_keys) == 0:
     try:
         hospital_cnt = dfs['hospital'].groupby('행정동').size().reset_index(name='동물병원수')
         pharmacy_cnt = dfs['pharmacy'].groupby('행정동').size().reset_index(name='동물약국수')
 
-        move_col  = [c for c in dfs['move_pop'].columns  if c != '행정동'][0]
-        shop_col  = [c for c in dfs['pet_shop'].columns  if c != '행정동'][0]
-        bus_col   = [c for c in dfs['bus'].columns       if c != '행정동'][0]
-        sub_col   = [c for c in dfs['subway'].columns    if c != '행정동'][0]
+        move_col  = [c for c in dfs['move_pop'].columns   if c != '행정동'][0]
+        shop_col  = [c for c in dfs['pet_shop'].columns   if c != '행정동'][0]
+        bus_col   = [c for c in dfs['bus'].columns        if c != '행정동'][0]
+        sub_col   = [c for c in dfs['subway'].columns     if c != '행정동'][0]
         play_col  = [c for c in dfs['playground'].columns if c != '행정동'][0]
-        park_col  = [c for c in dfs['pet_park'].columns  if c != '행정동'][0]
+        park_col  = [c for c in dfs['pet_park'].columns   if c != '행정동'][0]
 
         df_all = dfs['population'][['행정동', '인구수']].copy()
-        df_all = df_all.merge(dfs['move_pop'][['행정동', move_col]].rename(columns={move_col: '유동인구'}), on='행정동', how='left')
-        df_all = df_all.merge(hospital_cnt, on='행정동', how='left')
-        df_all = df_all.merge(pharmacy_cnt, on='행정동', how='left')
-        df_all = df_all.merge(dfs['pet_shop'][['행정동', shop_col]].rename(columns={shop_col: '펫샵수'}), on='행정동', how='left')
-        df_all = df_all.merge(dfs['bus'][['행정동', bus_col]].rename(columns={bus_col: '버스정류장수'}), on='행정동', how='left')
-        df_all = df_all.merge(dfs['subway'][['행정동', sub_col]].rename(columns={sub_col: '역개수'}), on='행정동', how='left')
+        df_all = df_all.merge(dfs['move_pop'][['행정동', move_col]].rename(columns={move_col: '유동인구'}),           on='행정동', how='left')
+        df_all = df_all.merge(hospital_cnt,                                                                           on='행정동', how='left')
+        df_all = df_all.merge(pharmacy_cnt,                                                                           on='행정동', how='left')
+        df_all = df_all.merge(dfs['pet_shop'][['행정동', shop_col]].rename(columns={shop_col: '펫샵수'}),            on='행정동', how='left')
+        df_all = df_all.merge(dfs['bus'][['행정동', bus_col]].rename(columns={bus_col: '버스정류장수'}),             on='행정동', how='left')
+        df_all = df_all.merge(dfs['subway'][['행정동', sub_col]].rename(columns={sub_col: '역개수'}),               on='행정동', how='left')
         df_all = df_all.merge(dfs['money'][['행정동', '공시지가_평균']].rename(columns={'공시지가_평균': '공시지가'}), on='행정동', how='left')
-        df_all = df_all.merge(dfs['playground'][['행정동', play_col]].rename(columns={play_col: '놀이터개수'}), on='행정동', how='left')
-        df_all = df_all.merge(dfs['pet_reg'][['행정동', '합계']].rename(columns={'합계': '반려동물등록수'}), on='행정동', how='left')
-        df_all = df_all.merge(dfs['pet_park'][['행정동', park_col]].rename(columns={park_col: '펫파크수'}), on='행정동', how='left')
+        df_all = df_all.merge(dfs['playground'][['행정동', play_col]].rename(columns={play_col: '놀이터개수'}),      on='행정동', how='left')
+        df_all = df_all.merge(dfs['pet_reg'][['행정동', '합계']].rename(columns={'합계': '반려동물등록수'}),         on='행정동', how='left')
+        df_all = df_all.merge(dfs['pet_park'][['행정동', park_col]].rename(columns={park_col: '펫파크수'}),         on='행정동', how='left')
         df_all = df_all.fillna(0)
 
         for col in df_all.columns:
@@ -139,14 +272,10 @@ if len(dfs) == len(['population','move_pop','hospital','pharmacy',
 
         st.markdown("**📋 변수별 기초통계**")
 
-        # 변수별 분포 박스플롯
         box_data = df_all[X_vars].copy()
-        # 정규화 (스케일 차이 크므로 시각화용)
         box_norm = (box_data - box_data.min()) / (box_data.max() - box_data.min() + 1e-9)
         box_norm['행정동'] = df_all['행정동']
         box_melt = box_norm.melt(id_vars='행정동', var_name='변수', value_name='정규화값')
-
-        var_colors = {name: color for name, color, _, _ in x_meta}
 
         fig_box = go.Figure()
         for name, color, _, _ in x_meta:
@@ -158,12 +287,11 @@ if len(dfs) == len(['population','move_pop','hospital','pharmacy',
                 boxmean='sd',
                 hovertemplate=f'<b>{name}</b><br>정규화값: %{{y:.3f}}<extra></extra>',
             ))
-
         fig_box.update_layout(
             template='plotly_white',
             title=dict(text='독립변수 분포 비교 (MinMax 정규화)', x=0.5, xanchor='center'),
             yaxis=dict(title='정규화값 (0~1)', gridcolor='#f1f5f9'),
-            xaxis=dict(title='변수'),
+            xaxis_title='변수',
             showlegend=False,
             margin=dict(t=50, b=20), height=340,
         )
@@ -181,10 +309,10 @@ if len(dfs) == len(['population','move_pop','hospital','pharmacy',
         st.markdown("---")
 
     except Exception as e:
-        st.warning(f"기초통계 계산 중 오류 (히트맵은 정상 표시됩니다): {e}")
+        st.warning(f"기초통계 계산 중 오류: {e}")
+        import traceback
+        st.code(traceback.format_exc())
         st.markdown("---")
-else:
-    st.markdown("---")
 
 # ══════════════════════════════════════════
 # 1. 상관계수 히트맵
