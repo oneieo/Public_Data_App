@@ -53,46 +53,59 @@ outlier_df = load_outliers()
 # ══════════════════════════════════════════
 st.subheader("📊 전처리 단계별 데이터 변화")
 
-# 분석 스크립트 실행 결과값 그대로 하드코딩
-# (분석 코드를 바꾸면 여기도 업데이트)
 step_df = pd.DataFrame({
     "단계": ["원본", "시설유형 제거 후", "실내 제거 후", "최종"],
-    "행 수": [1144, 977, 963, len(df)]  # ← 실제 숫자로 교체
-    # 예) [3241, 2800, 2400, len(df)]
+    "행 수": [1144, 977, 963, len(df)],
+    "색상": ["#e2e8f0", "#cbd5e1", "#94a3b8", "#16a34a"]  # 앞 3개 회색, 최종 진한 초록
+})
+
+missing_step_df = pd.DataFrame({
+    "단계": ["초기", "행 제거 후", "중앙값 대체 후"],
+    "면적 결측치 수": [567, 469, 0],
+    "색상": ["#e2e8f0", "#cbd5e1", "#16a34a"]  # 초기/행제거 회색, 완료 초록
 })
 
 col1, col2 = st.columns(2)
 
 with col1:
-    fig = px.bar(
-        step_df, x="단계", y="행 수",
-        text="행 수",
-        color="단계",
-        color_discrete_sequence=px.colors.sequential.Blues_r,
-        title="전처리 단계별 데이터 행 수 변화"
+    fig = go.Figure(go.Bar(
+        x=step_df["단계"],
+        y=step_df["행 수"],
+        text=step_df["행 수"],
+        textposition="outside",
+        marker_color=step_df["색상"].tolist(),
+        marker_line=dict(color="white", width=1.5),
+    ))
+    fig.update_layout(
+        title=dict(text="전처리 단계별 데이터 행 수 변화", x=0.5, xanchor="center"),
+        template="plotly_white",
+        showlegend=False,
+        yaxis=dict(title="행 수", gridcolor="#f1f5f9"),
+        xaxis=dict(title=""),
+        margin=dict(t=50, b=20),
+        height=360
     )
-    fig.update_traces(textposition="outside")
-    fig.update_layout(showlegend=False, yaxis_title="행 수", xaxis_title="")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="bar_step")
 
 with col2:
-    # 결측치 변화도 같은 방식
-    # 분석 코드 실행 결과 숫자를 아래에 입력
-    missing_step_df = pd.DataFrame({
-        "단계": ["초기", "행 제거 후", "중앙값 대체 후"],
-        "면적 결측치 수": [567, 469, 0]  # ← 실제 숫자로 교체
-        # 예) [312, 120, 0]
-    })
-    fig2 = px.bar(
-        missing_step_df, x="단계", y="면적 결측치 수",
-        text="면적 결측치 수",
-        color="단계",
-        color_discrete_sequence=["#ef4444", "#f97316", "#22c55e"],
-        title="면적 결측치 처리 전후 비교"
+    fig2 = go.Figure(go.Bar(
+        x=missing_step_df["단계"],
+        y=missing_step_df["면적 결측치 수"],
+        text=missing_step_df["면적 결측치 수"],
+        textposition="outside",
+        marker_color=missing_step_df["색상"].tolist(),
+        marker_line=dict(color="white", width=1.5),
+    ))
+    fig2.update_layout(
+        title=dict(text="면적 결측치 처리 전후 비교", x=0.5, xanchor="center"),
+        template="plotly_white",
+        showlegend=False,
+        yaxis=dict(title="결측치 수", gridcolor="#f1f5f9"),
+        xaxis=dict(title=""),
+        margin=dict(t=50, b=20),
+        height=360
     )
-    fig2.update_traces(textposition="outside")
-    fig2.update_layout(showlegend=False, xaxis_title="")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True, key="bar_missing")
 
 st.markdown("---")
 
@@ -111,14 +124,17 @@ with col1:
     )
 
 with col2:
+    median_sorted = median_df.sort_values("시설유형별_면적_중앙값").reset_index(drop=True)
+    median_sorted["색순위"] = range(len(median_sorted))  # 0, 1, 2, 3...
+
     fig3 = px.bar(
-        median_df.sort_values("시설유형별_면적_중앙값"),
+        median_sorted,
         x="시설유형별_면적_중앙값",
         y="시설유형",
         orientation="h",
         text="시설유형별_면적_중앙값",
-        color="시설유형별_면적_중앙값",
-        color_continuous_scale="Blues",
+        color="색순위",                          
+        color_continuous_scale="Greens",
         title="시설유형별 면적 중앙값 (㎡)"
     )
     fig3.update_traces(texttemplate="%{text:.0f}", textposition="outside")
@@ -138,23 +154,56 @@ with col1:
     st.dataframe(missing_df, use_container_width=True, hide_index=True)
 
 with col2:
-    # 결측치 0인 컬럼은 숨기고 있는 것만 표시
-    has_missing = missing_df[missing_df["결측치 수"] > 0]
-    if has_missing.empty:
+    has_any_missing = missing_df["결측치 수"].sum() > 0
+
+    # 결측치 있는 컬럼 강조색, 없는 컬럼 회색
+    colors = [
+        "#ef4444" if v > 0 else "#e2e8f0"
+        for v in missing_df["결측치 수"]
+    ]
+
+    fig4 = go.Figure(go.Bar(
+        x=missing_df["결측치 수"],
+        y=missing_df["컬럼"],
+        orientation="h",
+        text=missing_df["결측치 수"].apply(lambda v: str("") if v > 0 else ""),
+        textposition="outside",
+        marker_color=colors,
+        marker_line=dict(color="white", width=1),
+    ))
+
+    fig4.update_layout(
+        title=dict(
+            text="컬럼별 결측치 현황",
+            x=0.5, xanchor="center",
+            font=dict(size=16, color="#000000" if has_any_missing else "#16a34a")
+        ),
+        template="plotly_white",
+        xaxis=dict(title="결측치 수", gridcolor="#f1f5f9"),
+        yaxis=dict(title="", autorange="reversed"),  # 위에서부터 순서대로
+        margin=dict(t=50, r=60, b=20),
+        height=max(300, len(missing_df) * 32),
+        showlegend=False
+    )
+
+    # 결측치 있는 컬럼에 어노테이션
+    for _, row in missing_df[missing_df["결측치 수"] > 0].iterrows():
+        fig4.add_annotation(
+            x=row["결측치 수"],
+            y=row["컬럼"],
+            text=f"  ← {row['결측치 수']}개 결측",
+            showarrow=False,
+            xanchor="left",
+            font=dict(color="#ef4444", size=15)
+        )
+
+    st.plotly_chart(fig4, use_container_width=True, key="bar_missing_check")
+
+    if not has_any_missing:
         st.success("🎉 모든 컬럼의 결측치가 0입니다!")
     else:
-        fig4 = px.bar(
-            has_missing.sort_values("결측치 수"),
-            x="결측치 수", y="컬럼",
-            orientation="h",
-            text="결측치 수",
-            color="결측치 수",
-            color_continuous_scale="Reds",
-            title="결측치가 남아있는 컬럼"
-        )
-        fig4.update_traces(textposition="outside")
-        fig4.update_layout(coloraxis_showscale=False)
-        st.plotly_chart(fig4, use_container_width=True)
+        missing_cols = missing_df[missing_df["결측치 수"] > 0]["컬럼"].tolist()
+        st.warning(f"⚠️ 결측치 있는 컬럼: {', '.join(missing_cols)}")
 
 st.markdown("---")
 
