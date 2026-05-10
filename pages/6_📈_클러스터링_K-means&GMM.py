@@ -135,7 +135,7 @@ with col_var:
         x=var_df['주성분'],
         y=var_df['개별 설명력 (%)'],
         name='개별 설명력',
-        marker=dict(color=['#6366f1', '#a5b4fc'], cornerradius=6),
+        marker=dict(color=["#63a5f1", "#a5dffc"], cornerradius=6),
         text=[f"{v}%" for v in var_df['개별 설명력 (%)']],
         textposition='outside',
         width=0.4,
@@ -172,11 +172,11 @@ with col_heat:
         x=load_pcs,
         y=load_vars,
         colorscale=[
-            [0.0,  '#b91c1c'],
-            [0.25, '#ef4444'],
+            [0.0,  "#da1616"],
+            [0.25, "#ff3636"],
             [0.5,  '#f8fafc'],
-            [0.75, '#6366f1'],
-            [1.0,  '#312e81'],
+            [0.75, "#005fb8"],
+            [1.0,  "#004faa"],
         ],
         zmid=0, zmin=-1, zmax=1,
         text=[[f"{v:+.3f}" for v in row] for row in load_vals],
@@ -364,7 +364,7 @@ col3, col4 = st.columns(2)
 
 with col3:
     fig3 = px.histogram(ground, x='펫존거리', nbins=35, title='펫존거리 분포',
-                        color_discrete_sequence=['#10b981'], template='plotly_white')
+                        color_discrete_sequence=["#10b953"], template='plotly_white')
     fig3.update_layout(bargap=0.05, showlegend=False,
                        xaxis_title='거리 (km)', yaxis_title='개수',
                        margin=dict(t=50, b=20), height=280)
@@ -436,7 +436,7 @@ st.markdown("---")
 
 st.markdown("##### 🔥 변수 간 상관관계")
 corr = ground[features].corr().round(3)
-fig8 = px.imshow(corr, color_continuous_scale='RdBu', color_continuous_midpoint=0,
+fig8 = px.imshow(corr, color_continuous_scale='Greens', color_continuous_midpoint=0,
                  text_auto=True, aspect='auto', template='plotly_white',
                  title='클러스터 변수 간 상관관계')
 fig8.update_layout(title=dict(x=0.5, xanchor='center'), margin=dict(t=60), height=350)
