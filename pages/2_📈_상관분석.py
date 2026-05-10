@@ -16,10 +16,8 @@ DATA_DIR   = os.path.join(BASE_DIR, 'data')
 # 0. 변수 설명 섹션 (신규)
 # ══════════════════════════════════════════
 st.subheader("📌 분석 변수 설명")
-st.caption("상관분석에 사용된 독립변수(X)와 종속변수(Y)를 확인합니다.")
 
 # ── X 변수 카드 ───────────────────────────
-st.markdown("**독립변수 (X) — 6개**")
 
 x_meta = [
     ("인구수",      "#6366f1", "👥", "행정동 거주 인구 수"),
@@ -49,38 +47,6 @@ for col, (name, color, icon, desc) in zip(cols, x_meta):
         """,
         unsafe_allow_html=True,
     )
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# ── Y 변수 카드 ───────────────────────────
-st.markdown("**종속변수 (Y) — 1개**")
-
-st.markdown(
-    """
-    <div style="
-        background: linear-gradient(135deg, #0ea5e918, #0ea5e908);
-        border: 1.5px solid #0ea5e955;
-        border-radius: 10px;
-        padding: 16px 20px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        max-width: 520px;
-    ">
-        <div style="font-size:32px">🐾</div>
-        <div>
-            <div style="font-weight:700; font-size:15px; color:#0ea5e9">
-                반려동물 등록수 ÷ (펫파크 수 + 1)
-            </div>
-            <div style="font-size:12px; color:#64748b; margin-top:4px">
-                펫파크 공급 대비 반려동물 수요를 나타내는 지표<br>
-                값이 클수록 <b>펫파크 부족</b> → 전환 필요성 높음
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -242,15 +208,6 @@ fig_heat.update_layout(
 )
 st.plotly_chart(fig_heat, use_container_width=True, key="corr_heatmap")
 
-with st.expander("📌 판단 기준 보기"):
-    st.markdown("""
-    | 상관계수 | 판단 |
-    |---|---|
-    | 0.9 이상 | 🔴 변수 제거 또는 통합 검토 |
-    | 0.7 ~ 0.9 | 🟡 주의 |
-    | 0.7 미만  | 🟢 사용 가능 |
-    """)
-
 st.markdown("---")
 
 # ══════════════════════════════════════════
@@ -295,6 +252,15 @@ with col2:
         st.dataframe(pd.DataFrame(danger_pairs), use_container_width=True)
     else:
         st.success("✅ 다중공선성 위험 변수 없음! 모든 변수 사용 가능")
+
+with st.expander("📌 판단 기준 보기"):
+    st.markdown("""
+    | 상관계수 | 판단 |
+    |---|---|
+    | 0.9 이상 | 🔴 변수 제거 또는 통합 검토 |
+    | 0.7 ~ 0.9 | 🟡 주의 |
+    | 0.7 미만  | 🟢 사용 가능 |
+    """)
 
 st.markdown("---")
 
