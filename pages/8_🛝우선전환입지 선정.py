@@ -223,14 +223,14 @@ with col_left:
     <div style="margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <div style="width:12px;height:12px;border-radius:50%;
-                        background:#ef4444;border:2px solid white;
-                        box-shadow:0 0 0 2px #ef4444"></div>
+                        background:#1AB252;border:2px solid white;
+                        box-shadow:0 0 0 2px #1AB252"></div>
             <span style="font-size:13px"><b>공공시설</b> (전환 대상)</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
             <div style="width:10px;height:10px;border-radius:50%;
-                        background:#94a3b8;opacity:0.6"></div>
-            <span style="font-size:13px;color:#64748b">전체 후보</span>
+                        background:#00CA4A;opacity:0.6"></div>
+            <span style="font-size:13px">전체 후보</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -246,13 +246,13 @@ with col_left:
 
         st.markdown(f"""
         <div style="
-            border-left: 3px solid #ef4444;
+            border-left: 3px solid #00CA4A;
             padding: 8px 12px;
             margin-bottom: 10px;
             border-radius: 0 6px 6px 0;
-            background: rgba(239,68,68,0.05);
+            background: rgba(0,202,74,0.05);
         ">
-            <div style="font-size:11px;color:#ef4444;font-weight:600">
+            <div style="font-size:11px;color:#00CA4A;font-weight:600">
                 {rank}순위 · {dong}
             </div>
             <div style="font-size:13px;font-weight:600;margin:2px 0">
@@ -282,9 +282,9 @@ with col_right:
             folium.CircleMarker(
                 location=[row['위도'], row['경도']],
                 radius=4,
-                color='#94a3b8',
+                color='#1AB252',
                 fill=True,
-                fill_color='#94a3b8',
+                fill_color='#1AB252',
                 fill_opacity=0.35,
                 weight=1,
                 tooltip=folium.Tooltip(
@@ -306,7 +306,7 @@ with col_right:
             # 번호 뱃지 마커
             icon_html = f"""
             <div style="
-                background: #ef4444;
+                background: #16A34A;
                 color: white;
                 border-radius: 50%;
                 width: 28px;
@@ -318,7 +318,7 @@ with col_right:
                 font-weight: 700;
                 font-family: sans-serif;
                 border: 2.5px solid white;
-                box-shadow: 0 2px 8px rgba(239,68,68,0.5);
+                box-shadow: 0 2px 8px rgba(22,163,74,100);
                 cursor: pointer;
             ">{rank}</div>
             """
@@ -334,14 +334,14 @@ with col_right:
                     margin-bottom:8px;
                 ">
                     <div style="
-                        background:#ef4444;color:white;
+                        background:#16A34A;color:white;
                         border-radius:50%;width:22px;height:22px;
                         display:flex;align-items:center;justify-content:center;
                         font-size:11px;font-weight:700;flex-shrink:0
                     ">{rank}</div>
                     <b style="font-size:14px">{name}</b>
                 </div>
-                <div style="font-size:12px;color:#475569;line-height:1.9">
+                <div style="font-size:12px;color:#64748b;line-height:1.9">
                     📍 {dong}<br>
                     🕐 노후도 {int(age)}년<br>
                     📐 면적 {int(area)} ㎡<br>
