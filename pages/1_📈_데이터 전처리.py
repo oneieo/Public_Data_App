@@ -158,7 +158,7 @@ with col2:
 
     # 결측치 있는 컬럼 강조색, 없는 컬럼 회색
     colors = [
-        "#ef4444" if v > 0 else "#e2e8f0"
+        "#ff621e" if v > 0 else "#e2e8f0"
         for v in missing_df["결측치 수"]
     ]
 
@@ -194,7 +194,7 @@ with col2:
             text=f"  ← {row['결측치 수']}개 결측",
             showarrow=False,
             xanchor="left",
-            font=dict(color="#ef4444", size=15)
+            font=dict(color="#ff621e", size=15)
         )
 
     st.plotly_chart(fig4, use_container_width=True, key="bar_missing_check")
@@ -239,30 +239,63 @@ col4.metric("상한값", f"{upper:,.1f} ㎡")
 col_a, col_b = st.columns(2)
 
 with col_a:
-    fig5 = px.histogram(
-        area, nbins=40,
+    # 구간별 색상 분리
+    counts, bins = pd.cut(area, bins=40, retbins=True)
+    bin_centers = (bins[:-1] + bins[1:]) / 2
+    bin_counts = counts.value_counts(sort=False).values
+    bar_colors = [
+        "#F97316" if (b < lower or b > upper) else "#16A34A"
+        for b in bin_centers
+    ]
+
+    fig5 = go.Figure(go.Bar(
+        x=bin_centers,
+        y=bin_counts,
+        marker_color=bar_colors,
+        name="면적"
+    ))
+    fig5.add_vline(x=lower, line_dash="dash", line_color="orange", annotation_text="하한값")
+    fig5.add_vline(x=upper, line_dash="dash", line_color="green", annotation_text="상한값")
+    fig5.update_layout(
         title="면적 분포 히스토그램",
-        labels={"value": "면적(㎡)", "count": "개수"},
-        color_discrete_sequence=["#3b82f6"],
+        xaxis_title="면적(㎡)",
+        yaxis_title="count",
+        bargap=0.05,
+        showlegend=False,
         template="plotly_white"
     )
-    fig5.update_layout(bargap=0.05, showlegend=False)
-    fig5.add_vline(x=lower, line_dash="dash", line_color="red",  annotation_text="하한값")
-    fig5.add_vline(x=upper, line_dash="dash", line_color="blue", annotation_text="상한값")
     st.plotly_chart(fig5, use_container_width=True, key="hist_area_iqr")
 
 with col_b:
+    # 이상치 따로 분리
+    outliers_pts = area[(area < lower) | (area > upper)]
+    normal_pts   = area[(area >= lower) & (area <= upper)]
+
     fig6 = go.Figure()
+
+    # 박스플롯 (이상치 점 숨김)
     fig6.add_trace(go.Box(
         x=area,
         name="면적",
-        marker_color="#3b82f6",
-        boxmean=True
+        marker_color="#16A34A",
+        boxmean=True,
+        boxpoints=False  # 기본 이상치 점 숨기기
     ))
+
+    # 이상치 점 별도로 주황색으로 추가
+    fig6.add_trace(go.Scatter(
+        x=outliers_pts,
+        y=["면적"] * len(outliers_pts),
+        mode="markers",
+        marker=dict(color="#F97316", size=8),
+        name="이상치"
+    ))
+
     fig6.update_layout(
         title="면적 박스플롯",
         xaxis_title="면적(㎡)",
-        template="plotly_white"
+        template="plotly_white",
+        showlegend=False
     )
     st.plotly_chart(fig6, use_container_width=True, key="box_area_iqr")
 
@@ -279,14 +312,14 @@ fig7 = px.scatter(
     df_scatter,
     x="index", y=AREA_COL,
     color="이상치",
-    color_discrete_map={"정상": "#3b82f6", "이상치": "#ef4444"},
+    color_discrete_map={"정상": "#16A34A", "이상치": "#ff621e"},
     opacity=0.6,
     title="면적 산점도 (이상치 구분)",
     labels={"index": "Index", AREA_COL: "면적(㎡)"},
     template="plotly_white"
 )
-fig7.add_hline(y=lower, line_dash="dash", line_color="red",  annotation_text="하한값")
-fig7.add_hline(y=upper, line_dash="dash", line_color="blue", annotation_text="상한값")
+fig7.add_hline(y=lower, line_dash="dash", line_color="orange",  annotation_text="하한값")
+fig7.add_hline(y=upper, line_dash="dash", line_color="green", annotation_text="상한값")
 st.plotly_chart(fig7, use_container_width=True, key="scatter_area_iqr")
 
 st.markdown("---")
