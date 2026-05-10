@@ -544,7 +544,7 @@ st.markdown("---")
 st.markdown("##### 🔵 클러스터링 결과")
 
 color_map = {f'클러스터 {i+1} ({sizes[i]}개)': COLORS[i] for i in range(optimal_k)}
-
+ 
 fig_km = px.scatter(
     cluster_df, x='PC1', y='PC2', color='클러스터',
     color_discrete_map=color_map,
@@ -559,6 +559,34 @@ fig_km.update_layout(
     yaxis=dict(title=f'PC2 ({explained[1]*100:.0f}%)', gridcolor='#f1f5f9'),
     legend=dict(title='클러스터'), margin=dict(t=60, b=20), height=480
 )
+ 
+# ── Convex Hull 외곽선 + 배경색 ──────────────────
+from scipy.spatial import ConvexHull
+ 
+for i in range(optimal_k):
+    mask  = labels == i
+    pts   = X_pca[mask]          # shape (n, 2)
+    color = COLORS[i]
+ 
+    if mask.sum() >= 3:
+        try:
+            hull  = ConvexHull(pts)
+            verts = np.append(hull.vertices, hull.vertices[0])  # 닫힘
+            fig_km.add_trace(go.Scatter(
+                x=pts[verts, 0],
+                y=pts[verts, 1],
+                mode='lines',
+                line=dict(color=color, width=1.8, dash='dot'),
+                fill='toself',
+                fillcolor=color,
+                opacity=0.12,
+                showlegend=False,
+                hoverinfo='skip',
+            ))
+        except Exception:
+            pass
+ 
+# ── 클러스터 중심 마커 ────────────────────────────
 for i in range(optimal_k):
     mask = labels == i
     fig_km.add_trace(go.Scatter(
@@ -568,8 +596,9 @@ for i in range(optimal_k):
         text=[f'C{i+1}'], textposition='top center',
         textfont=dict(size=11, color=COLORS[i]), showlegend=False
     ))
+ 
 st.plotly_chart(fig_km, use_container_width=True, key="km_scatter")
-
+ 
 size_df = pd.DataFrame({
     '클러스터': [f'클러스터 {i+1}' for i in range(optimal_k)],
     '개수': sizes
@@ -584,7 +613,7 @@ fig_size.update_layout(showlegend=False, title=dict(x=0.5, xanchor='center'),
                        yaxis=dict(gridcolor='#f1f5f9'),
                        margin=dict(t=50, b=20), height=280)
 st.plotly_chart(fig_size, use_container_width=True, key="km_size")
-
+ 
 with st.expander("📌 K-means 기각 이유"):
     st.error(f"클래스 불균형 심함 ({min(sizes)}개 vs {max(sizes)}개, {ratio:.1f}배 차이) → 분석 신뢰성 낮음")
     st.markdown("""
@@ -592,7 +621,7 @@ with st.expander("📌 K-means 기각 이유"):
     - 이상치에 민감한 평균 기반 방식
     - 소규모 데이터에 불리
     """)
-
+ 
 st.markdown("---")
 
 # ══════════════════════════════
@@ -675,7 +704,7 @@ st.caption(f"PC1 봉우리 {len(kde_results['PC1']['peaks'])}개 기준 → GMM 
 st.markdown("---")
 
 st.markdown("##### 🔴 클러스터링 결과")
-
+ 
 cluster_df_g = pd.DataFrame({
     'PC1':      X_pca_g[:, 0],
     'PC2':      X_pca_g[:, 1],
@@ -685,9 +714,9 @@ cluster_df_g = pd.DataFrame({
     '노후도':   ground_r['노후도'].values,
     '펫존거리': ground_r['펫존거리'].values,
 })
-
+ 
 color_map_g = {f'클러스터 {i+1} ({sizes_g[i]}개)': COLORS[i] for i in range(optimal_k_g)}
-
+ 
 fig_gmm = px.scatter(
     cluster_df_g, x='PC1', y='PC2', color='클러스터',
     color_discrete_map=color_map_g,
@@ -702,6 +731,34 @@ fig_gmm.update_layout(
     yaxis=dict(title=f'PC2 ({explained_g[1]*100:.0f}%)', gridcolor='#f1f5f9'),
     legend=dict(title='클러스터'), margin=dict(t=60, b=20), height=480
 )
+ 
+# ── Convex Hull 외곽선 + 배경색 ──────────────────
+from scipy.spatial import ConvexHull
+ 
+for i in range(optimal_k_g):
+    mask  = labels_g == i
+    pts   = X_pca_g[mask]
+    color = COLORS[i]
+ 
+    if mask.sum() >= 3:
+        try:
+            hull  = ConvexHull(pts)
+            verts = np.append(hull.vertices, hull.vertices[0])  # 닫힘
+            fig_gmm.add_trace(go.Scatter(
+                x=pts[verts, 0],
+                y=pts[verts, 1],
+                mode='lines',
+                line=dict(color=color, width=1.8, dash='dot'),
+                fill='toself',
+                fillcolor=color,
+                opacity=0.12,
+                showlegend=False,
+                hoverinfo='skip',
+            ))
+        except Exception:
+            pass
+ 
+# ── 클러스터 중심 마커 ────────────────────────────
 for i in range(optimal_k_g):
     mask = labels_g == i
     fig_gmm.add_trace(go.Scatter(
@@ -711,8 +768,9 @@ for i in range(optimal_k_g):
         text=[f'C{i+1}'], textposition='top center',
         textfont=dict(size=11, color=COLORS[i]), showlegend=False
     ))
+ 
 st.plotly_chart(fig_gmm, use_container_width=True, key="gmm_scatter")
-
+ 
 size_df_g = pd.DataFrame({
     '클러스터': [f'클러스터 {i+1}' for i in range(optimal_k_g)],
     '개수': sizes_g
@@ -727,7 +785,7 @@ fig_size_g.update_layout(showlegend=False, title=dict(x=0.5, xanchor='center'),
                           yaxis=dict(gridcolor='#f1f5f9'),
                           margin=dict(t=50, b=20), height=280)
 st.plotly_chart(fig_size_g, use_container_width=True, key="gmm_size")
-
+ 
 with st.expander("📌 GMM 기각 이유"):
     st.error(f"클래스 불균형 심함 ({min(sizes_g)}개 vs {max(sizes_g)}개, {ratio_g:.1f}배 차이) → 분석 신뢰성 낮음")
     st.markdown("""
