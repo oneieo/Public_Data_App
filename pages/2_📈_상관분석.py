@@ -400,7 +400,7 @@ st.subheader("📐 VIF (분산팽창계수)")
 def get_vif_color(v):
     if v >= 10: return '#ef4444'
     elif v >= 5: return '#f59e0b'
-    else:        return '#22c55e'
+    else:        return "#24C85B"
 
 fig_vif = go.Figure(go.Bar(
     x=vif['변수'],

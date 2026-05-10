@@ -73,7 +73,7 @@ fig.add_trace(go.Scatter(
     x=adj_data['scenario_name'],
     y=adj_data['순위'],
     mode='markers+lines',
-    marker=dict(size=8, color='steelblue'),
+    marker=dict(size=8, color='green'),
     name='시나리오별 순위',
     hovertemplate='%{x}<br>순위: %{y}위'
 ))

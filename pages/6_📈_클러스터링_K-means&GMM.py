@@ -374,7 +374,7 @@ with col4:
     pub_counts = ground['공공시설여부'].map({1: '공공', 0: '민간'}).value_counts().reset_index()
     pub_counts.columns = ['구분', '개수']
     fig4 = px.pie(pub_counts, names='구분', values='개수', title='공공 / 민간 비율',
-                  color_discrete_sequence=['#6366f1', '#94a3b8'], template='plotly_white')
+                  color_discrete_sequence=["#f87dae", "#eaeaea"], template='plotly_white')
     fig4.update_traces(textposition='inside', textinfo='percent+label')
     fig4.update_layout(margin=dict(t=50, b=20), height=280, showlegend=False)
     st.plotly_chart(fig4, use_container_width=True, key="pie_public")

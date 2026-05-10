@@ -75,11 +75,11 @@ if selected_var:
         subplot_titles=[f'{selected_var} — 정규화 전', f'{selected_var} — Z-score 정규화 후']
     )
     fig5.add_trace(
-        go.Histogram(x=before, nbinsx=25, marker_color='#6366f1', opacity=0.75, name='정규화 전'),
+        go.Histogram(x=before, nbinsx=25, marker_color="#cbcbcb", opacity=0.75, name='정규화 전'),
         row=1, col=1
     )
     fig5.add_trace(
-        go.Histogram(x=after, nbinsx=25, marker_color='#22c55e', opacity=0.75, name='정규화 후'),
+        go.Histogram(x=after, nbinsx=25, marker_color="#56AAEE", opacity=0.75, name='정규화 후'),
         row=1, col=2
     )
     fig5.update_layout(
@@ -301,7 +301,7 @@ with col1:
 
 with col2:
     sig_coef = coef_df[coef_df['변수'] != '절편'].copy()
-    sig_coef['색상'] = sig_coef['유의여부'].map({'O': '#6366f1', 'X': '#94a3b8'})
+    sig_coef['색상'] = sig_coef['유의여부'].map({'O': "#A8ADFF", 'X': '#cbcbcb'})
     sig_coef['비표준화_회귀계수'] = pd.to_numeric(sig_coef['비표준화_회귀계수'])
     sig_coef['표준오차']           = pd.to_numeric(sig_coef['표준오차'])
 
@@ -320,12 +320,12 @@ with col2:
         ),
         text=sig_coef['유의성'],
         textposition='outside',
-        textfont=dict(size=13, color='#6366f1'),
+        textfont=dict(size=13, color='#A8ADFF'),
         name='회귀계수'
     ))
     fig.add_hline(y=0, line_color='#cbd5e1', line_width=1.5)
-    fig.add_trace(go.Bar(x=[None], y=[None], marker_color='#6366f1', name='유의 (p<0.05)', showlegend=True))
-    fig.add_trace(go.Bar(x=[None], y=[None], marker_color='#94a3b8', name='비유의',         showlegend=True))
+    fig.add_trace(go.Bar(x=[None], y=[None], marker_color="#A8ADFF", name='유의 (p<0.05)', showlegend=True))
+    fig.add_trace(go.Bar(x=[None], y=[None], marker_color="#cbcbcb", name='비유의',         showlegend=True))
     fig.update_layout(
         title=dict(text='변수별 회귀계수 (에러바: 표준오차)', font=dict(size=15), x=0.5, xanchor='center'),
         template='plotly_white',
@@ -356,7 +356,7 @@ with col1:
 with col2:
     weight_sorted = weight_df.sort_values('가중치_절댓값비율(%)', ascending=True)
     weight_sorted['방향색'] = weight_sorted['방향'].apply(
-        lambda x: '#6366f1' if '높을수록' in x else '#f43f5e'
+        lambda x: "#4cc1f8" if '높을수록' in x else "#f580a1"
     )
     fig2 = go.Figure(go.Bar(
         x=weight_sorted['가중치_절댓값비율(%)'],
@@ -369,8 +369,8 @@ with col2:
             cornerradius=5, line=dict(color='white', width=1)
         ),
     ))
-    fig2.add_trace(go.Bar(x=[None], y=[None], orientation='h', marker_color='#6366f1', name='↑ 높을수록 유리', showlegend=True))
-    fig2.add_trace(go.Bar(x=[None], y=[None], orientation='h', marker_color='#f43f5e', name='↓ 낮을수록 유리', showlegend=True))
+    fig2.add_trace(go.Bar(x=[None], y=[None], orientation='h', marker_color="#57bfef", name='↑ 높을수록 유리', showlegend=True))
+    fig2.add_trace(go.Bar(x=[None], y=[None], orientation='h', marker_color='#f580a1', name='↓ 낮을수록 유리', showlegend=True))
     fig2.update_layout(
         title=dict(text='변수별 가중치 비율 (절댓값 기준)', font=dict(size=15), x=0.5, xanchor='center'),
         template='plotly_white',
