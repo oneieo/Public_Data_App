@@ -158,44 +158,51 @@ with col2:
 
 st.markdown("---")
 
-# ══════════════════════════════════════════
-# 섹션 4. 면적 이상치 분석 (IQR)
-# ── 최종 cleaned 데이터로 직접 계산
-# ══════════════════════════════════════════
+# # ══════════════════════════════════════════
+# # 섹션 4. 면적 이상치 분석 (IQR)
+# # ══════════════════════════════════════════
+
 st.subheader("📦 면적 이상치 분석 (IQR)")
 
-area = df[AREA_COL].dropna()
+@st.cache_data
+def load_pgd():
+    return pd.read_csv(
+        os.path.join(OUTPUT_DIR, '..', 'data', 'pgd.csv'),
+        encoding='utf-8-sig'
+    )
 
-Q1 = area.quantile(0.25)
-Q3 = area.quantile(0.75)
-IQR = Q3 - Q1
+pgd_df = load_pgd()
+pgd_df[AREA_COL] = pd.to_numeric(pgd_df[AREA_COL], errors='coerce')
+area = pgd_df[AREA_COL].dropna()
+
+Q1    = area.quantile(0.25)
+Q3    = area.quantile(0.75)
+IQR   = Q3 - Q1
 lower = Q1 - 1.5 * IQR
 upper = Q3 + 1.5 * IQR
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Q1", f"{Q1:,.1f} ㎡")
-col2.metric("Q3", f"{Q3:,.1f} ㎡")
+col1.metric("Q1",   f"{Q1:,.1f} ㎡")
+col2.metric("Q3",   f"{Q3:,.1f} ㎡")
 col3.metric("하한값", f"{lower:,.1f} ㎡")
 col4.metric("상한값", f"{upper:,.1f} ㎡")
 
 col_a, col_b = st.columns(2)
 
 with col_a:
-    # 히스토그램 + KDE
     fig5 = px.histogram(
         area, nbins=40,
         title="면적 분포 히스토그램",
         labels={"value": "면적(㎡)", "count": "개수"},
-        color_discrete_sequence=["#3b82f6"]
+        color_discrete_sequence=["#3b82f6"],
+        template="plotly_white"
     )
     fig5.update_layout(bargap=0.05, showlegend=False)
-    # 이상치 경계선 추가
-    fig5.add_vline(x=lower, line_dash="dash", line_color="red",   annotation_text="하한값")
-    fig5.add_vline(x=upper, line_dash="dash", line_color="blue",  annotation_text="상한값")
-    st.plotly_chart(fig5, use_container_width=True)
+    fig5.add_vline(x=lower, line_dash="dash", line_color="red",  annotation_text="하한값")
+    fig5.add_vline(x=upper, line_dash="dash", line_color="blue", annotation_text="상한값")
+    st.plotly_chart(fig5, use_container_width=True, key="hist_area_iqr")
 
 with col_b:
-    # 박스플롯
     fig6 = go.Figure()
     fig6.add_trace(go.Box(
         x=area,
@@ -203,14 +210,21 @@ with col_b:
         marker_color="#3b82f6",
         boxmean=True
     ))
-    fig6.update_layout(title="면적 박스플롯", xaxis_title="면적(㎡)")
-    st.plotly_chart(fig6, use_container_width=True)
+    fig6.update_layout(
+        title="면적 박스플롯",
+        xaxis_title="면적(㎡)",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig6, use_container_width=True, key="box_area_iqr")
 
 # 산점도 (이상치 색상 구분)
-df_scatter = df[[AREA_COL]].dropna().reset_index()
+df_scatter = pgd_df[[AREA_COL]].dropna().reset_index()
 df_scatter["이상치"] = df_scatter[AREA_COL].apply(
     lambda v: "이상치" if v < lower or v > upper else "정상"
 )
+
+outlier_count = (df_scatter["이상치"] == "이상치").sum()
+st.caption(f"IQR 기준 이상치: {outlier_count}개 / 전체 {len(df_scatter)}개")
 
 fig7 = px.scatter(
     df_scatter,
@@ -219,11 +233,12 @@ fig7 = px.scatter(
     color_discrete_map={"정상": "#3b82f6", "이상치": "#ef4444"},
     opacity=0.6,
     title="면적 산점도 (이상치 구분)",
-    labels={"index": "Index", AREA_COL: "면적(㎡)"}
+    labels={"index": "Index", AREA_COL: "면적(㎡)"},
+    template="plotly_white"
 )
 fig7.add_hline(y=lower, line_dash="dash", line_color="red",  annotation_text="하한값")
 fig7.add_hline(y=upper, line_dash="dash", line_color="blue", annotation_text="상한값")
-st.plotly_chart(fig7, use_container_width=True)
+st.plotly_chart(fig7, use_container_width=True, key="scatter_area_iqr")
 
 st.markdown("---")
 
