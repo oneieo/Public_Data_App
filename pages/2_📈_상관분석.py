@@ -199,10 +199,10 @@ def read_csv_safe(path):
 def load_raw(data_dir):  # ← DATA_DIR을 인자로 받음
     files = {
         'population': 'final_population.csv',
-        'move_pop':   'move_population.csv',
+        'move_pop':   'move_population.CSV',
         'hospital':   'final_animal_hospital.csv',
         'pharmacy':   'final_animal_permercy.csv',
-        'pet_shop':   'pet_shop.csv',
+        'pet_shop':   'pet_shop.CSV',
         'bus':        'bus_count.csv',
         'subway':     'subway_station_count.csv',
         'money':      'money.csv',
