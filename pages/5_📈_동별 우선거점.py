@@ -73,11 +73,11 @@ fig = go.Figure()
 # 선택 영역 음영
 fig.add_vrect(
     x0=0.5, x1=optimal_k,
-    fillcolor='rgba(99,102,241,0.08)',
+    fillcolor='rgba(22,163,74,0.08)',
     line_width=0,
     annotation_text='선정 구간',
     annotation_position='top left',
-    annotation_font=dict(color='#6366f1', size=11)
+    annotation_font=dict(color='#16a34a', size=11)
 )
 
 # 누적합 곡선 — 그라데이션 효과 (fill)
@@ -85,9 +85,9 @@ fig.add_trace(go.Scatter(
     x=df['순위'],
     y=df['누적합'],
     mode='lines',
-    line=dict(color='#6366f1', width=2.5),
+    line=dict(color='#16a34a', width=2.5),
     fill='tozeroy',
-    fillcolor='rgba(99,102,241,0.08)',
+    fillcolor='rgba(22,163,74,0.08)',
     name='누적합',
     customdata=np.stack([df['행정동'], df[score_col]], axis=-1),
     hovertemplate=(
@@ -104,7 +104,7 @@ fig.add_trace(go.Scatter(
     x=df[df['순위'] <= optimal_k]['순위'],
     y=df[df['순위'] <= optimal_k]['누적합'],
     mode='markers',
-    marker=dict(size=6, color='#6366f1', opacity=0.7),
+    marker=dict(size=6, color='#16a34a', opacity=0.7),
     showlegend=False,
     hoverinfo='skip'
 ))
@@ -177,15 +177,15 @@ with col_left:
     st.markdown("""
     <div style="font-size:13px;line-height:2">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <div style="width:16px;height:16px;border-radius:3px;background:#312e81"></div>
+            <div style="width:16px;height:16px;border-radius:3px;background:#14532d"></div>
             <span>상위권 (1 ~ {a}위)</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <div style="width:16px;height:16px;border-radius:3px;background:#6366f1"></div>
+            <div style="width:16px;height:16px;border-radius:3px;background:#16a34a"></div>
             <span>중위권</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-            <div style="width:16px;height:16px;border-radius:3px;background:#e0e7ff"></div>
+            <div style="width:16px;height:16px;border-radius:3px;background:#dcfce7"></div>
             <span>하위권 ({b}위 ~)</span>
         </div>
     </div>
@@ -201,17 +201,17 @@ with col_left:
         <div style="
             display:flex;align-items:center;gap:8px;
             padding:5px 8px;margin-bottom:4px;
-            border-radius:6px;background:rgba(99,102,241,0.08);
+            border-radius:6px;background:rgba(22,163,74,0.08);
             font-size:12px;
         ">
             <div style="
-                background:#6366f1;color:white;
+                background:#16a34a;color:white;
                 border-radius:50%;width:20px;height:20px;
                 display:flex;align-items:center;justify-content:center;
                 font-size:10px;font-weight:700;flex-shrink:0
             ">{rank}</div>
             <span style="font-weight:600">{dong}</span>
-            <span style="color:#6366f1;margin-left:auto">{score:.3f}</span>
+            <span style="color:#16a34a;margin-left:auto">{score:.3f}</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -230,7 +230,7 @@ with col_right:
         geo,
         name='행정동',
         style_function=lambda feat: {
-            'fillColor':   '#6366f1' if rank_dict.get(feat['properties']['dong'], 999) <= optimal_k else 'white',
+            'fillColor':   '#16a34a' if rank_dict.get(feat['properties']['dong'], 999) <= optimal_k else 'white',
             'color':       '#94a3b8',
             'weight':      1.2,
             'fillOpacity': 0.75 if rank_dict.get(feat['properties']['dong'], 999) <= optimal_k else 0.3,
@@ -238,7 +238,7 @@ with col_right:
         highlight_function=lambda feat: {
             'fillOpacity': 0.95,
             'weight':      2,
-            'color':       '#4338ca'
+            'color':       '#15803d'
         },
         tooltip=folium.GeoJsonTooltip(
             fields=['dong'],
@@ -272,7 +272,7 @@ with col_right:
                 pointer-events:none;
             ">
                 <div style="
-                    background:#312e81;color:white;
+                    background:#14532d;color:white;
                     border-radius:50%;width:18px;height:18px;
                     display:flex;align-items:center;justify-content:center;
                     font-size:9px;font-weight:700;
