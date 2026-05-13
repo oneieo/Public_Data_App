@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="어린이 놀이터의 펫존 전환 입지 분석",
+    page_title="성남시 어린이 놀이터의 펫존 전환 입지 분석_오지선다",
     page_icon="🐾",
     layout="wide"
 )
