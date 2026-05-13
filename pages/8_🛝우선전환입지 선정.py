@@ -363,6 +363,20 @@ with col_right:
                     icon_anchor=(14, 14),
                 )
             ).add_to(m)
+            # folium.Marker(
+            #     location=[row['위도'], row['경도']],
+            #     tooltip=folium.Tooltip(
+            #         popup_html,          # 기존 popup_html을 그대로 사용
+            #         permanent=True,      # 👈 항상 표시
+            #         sticky=False,
+            #         style="font-family:sans-serif;font-size:12px"
+            #     ),
+            #     icon=folium.DivIcon(
+            #     html=icon_html,
+            #     icon_size=(28, 28),
+            #     icon_anchor=(14, 14),
+            #     )
+            # ).add_to(m)
 
     st_folium(m, use_container_width=True, height=540, key="final_map")
     st.caption("🖱️ 마커 클릭 시 상세정보 | 스크롤로 줌 인/아웃")
